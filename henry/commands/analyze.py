@@ -52,6 +52,9 @@ class Analyze(fetcher):
                                             min_queries=kwargs['min_queries'])
         self.analyze_logger.info('Analyze Complete')
 
+        valid_values = list(info[0].keys())
+        result = dc.sort(result, valid_values, sortkey)
+        result = dc.limit(result, limit=limit[0])
         return result
 
     def _analyze_projects(self, project=None, sortkey=None, limit=None):
@@ -74,10 +77,6 @@ class Analyze(fetcher):
                 'pull_request_mode': p['pr_mode'],
                 'validation_required': p['validation_required']
             })
-
-        valid_values = list(info[0].keys())
-        info = dc.sort(info, valid_values, sortkey)
-        info = dc.limit(info, limit=limit)
 
         return info
 
@@ -104,9 +103,7 @@ class Analyze(fetcher):
                 'unused_explores': len(unused_explores),
                 'query_run_count': query_run_count
             })
-        valid_values = list(info[0].keys())
-        info = dc.sort(info, valid_values, sortkey)
-        info = dc.limit(info, limit=limit)
+
         return info
 
     def _analyze_explores(self, model=None, explore=None,
@@ -162,7 +159,5 @@ class Analyze(fetcher):
         if not info:
             self.analyze_logger.error('No matching explores found')
             raise Exception('No matching explores found')
-        valid_values = list(info[0].keys())
-        info = dc.sort(info, valid_values, sortkey)
-        info = dc.limit(info, limit=limit)
+
         return info
