@@ -19,9 +19,7 @@ class Analyze(fetcher):
         if kwargs['which'] == 'projects':
             params = {k: kwargs[k] for k in {'project', 'sortkey', 'limit'}}
             self.analyze_logger.info('analyze projects params=%s', params)
-            result = self._analyze_projects(project=p,
-                                            sortkey=kwargs['sortkey'],
-                                            limit=kwargs['limit'])
+            result = self._analyze_projects(project=p)
         elif kwargs['which'] == 'models':
             params = {k: kwargs[k] for k in {'project',
                                              'model',
@@ -32,8 +30,6 @@ class Analyze(fetcher):
             self.analyze_logger.info('analyze models params=%s', params)
             result = self._analyze_models(project=p,
                                           model=m,
-                                          sortkey=kwargs['sortkey'],
-                                          limit=kwargs['limit'],
                                           timeframe=kwargs['timeframe'],
                                           min_queries=kwargs['min_queries'])
         elif kwargs['which'] == 'explores':
@@ -46,18 +42,16 @@ class Analyze(fetcher):
             self.analyze_logger.info('analyze explores params=%s', )
             result = self._analyze_explores(model=m,
                                             explore=kwargs['explore'],
-                                            sortkey=kwargs['sortkey'],
-                                            limit=kwargs['limit'],
                                             timeframe=kwargs['timeframe'],
                                             min_queries=kwargs['min_queries'])
         self.analyze_logger.info('Analyze Complete')
 
-        valid_values = list(info[0].keys())
-        result = dc.sort(result, valid_values, sortkey)
-        result = dc.limit(result, limit=limit[0])
+        valid_values = list(result[0].keys())
+        result = dc.sort(result, valid_values, kwargs['sortkey'])
+        result = dc.limit(result, kwargs['limit'])
         return result
 
-    def _analyze_projects(self, project=None, sortkey=None, limit=None):
+    def _analyze_projects(self, project=None):
         projects = fetcher.get_project_files(self, project=project)
         info = []
         for p in projects:
@@ -81,7 +75,6 @@ class Analyze(fetcher):
         return info
 
     def _analyze_models(self, project=None, model=None,
-                        sortkey=None, limit=None,
                         timeframe=90, min_queries=0):
         models = fetcher.get_models(self, project=project,
                                     model=model, verbose=1)
@@ -107,7 +100,6 @@ class Analyze(fetcher):
         return info
 
     def _analyze_explores(self, model=None, explore=None,
-                          sortkey=None, limit=None,
                           min_queries=0, timeframe=90):
         explores = fetcher.get_explores(self, model=model,
                                         explore=explore, verbose=1)
